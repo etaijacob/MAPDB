@@ -1,10 +1,19 @@
 Package: MAPDB
 Type: Package
-Title: What the Package Does (Title Case)
+Title: PDB/Uniprot/Pfam single and multiple sequences mapping
 Version: 0.1
 Date: 2015-09-04
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Etai Jacob
+Maintainer: Who to complain to <etai.jacob@gmail.com>
+Description: Mapping between a solved structure residues in a PDB file and a Pfam domain family or Uniprot protein
 License: What license is it under?
 LazyData: TRUE
+Authors@R: person("Etai", "Jacob", email = "etai.jacob@gmail.com",
+  role = c("aut", "cre"))
+URL: https://github.com/etaijacob/MAPDB
+BugReports: https://github.com/etaijacob/MAPDB/issues
+Imports:
+  bio3d,
+  utils,
+  pdist,
+  Biostrings
