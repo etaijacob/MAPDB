@@ -1,41 +1,41 @@
 #MAPDButils.R
 
 # Calculates lower triangle of i,j matrix:
-get_minimal_pairwise_dist_between_atoms_Ca_Cb <- function(atoms, sep.th=1) {
+get_minimal_pairwise_dist_between_atoms_Ca_Cb <- function(atoms) {
 
   pdm <- NULL
-  for(it in 1:(length(atoms)-sep.th)) {
-    for(jt in (it+sep.th):length(atoms)) {
-      i <- names(atoms)[it]
-      j <- names(atoms)[jt]
-      #print(i)
-      #print(j)
-      anyAtom = min(as.matrix(pdist::pdist(atoms[[i]][, c("x", "y", "z")],
-                                    atoms[[j]][, c("x", "y", "z")])))
-      if(atoms[[i]]$resid[1] == "GLY") {
-        cbi <- atoms[[i]][ atoms[[i]]$elety == "CA", c("x", "y", "z")]
-      } else {
-        cbi <- atoms[[i]][ atoms[[i]]$elety == "CB", c("x", "y", "z")]
-      }
-      if(atoms[[j]]$resid[1] == "GLY") {
-        cbj <- atoms[[j]][ atoms[[j]]$elety == "CA", c("x", "y", "z")]
-      } else {
-        cbj <- atoms[[j]][ atoms[[j]]$elety == "CB", c("x", "y", "z")]
-      }
+  nns <- combn(x = length(atoms), 2)
+  cat(sprintf("Calculating %d distances.\n", length(nns)))
+  get_my_dists <- function(mi) {
+    print(mi)
+    i <- names(atoms)[mi[1]]
+    j <- names(atoms)[mi[2]]
 
-      cai <- atoms[[i]][ atoms[[i]]$elety == "CA", c("x", "y", "z")]
-      caj <- atoms[[j]][ atoms[[j]]$elety == "CA", c("x", "y", "z")]
-
-      row <- data.frame(pdb.resno.i = atoms[[i]]$resno[1], pdb.resno.j = atoms[[j]]$resno[1],
-                        aai = aaa2a[atoms[[i]]$resid[1], ], aaj = aaa2a[atoms[[j]]$resid[1], ],
-                        dist.anyAtom = anyAtom,
-                        dist.ca = min(as.matrix(pdist::pdist(cai, caj))),
-                        dist.cb = min(as.matrix(pdist::pdist(cbi, cbj))),
-                        stringsAsFactors=F)
-      pdm <- rbind(pdm, row)
-
+    anyAtom = min(as.matrix(pdist::pdist(atoms[[i]][, c("x", "y", "z")],
+                                  atoms[[j]][, c("x", "y", "z")])))
+    if(atoms[[i]]$resid[1] == "GLY") {
+      cbi <- atoms[[i]][ atoms[[i]]$elety == "CA", c("x", "y", "z")]
+    } else {
+      cbi <- atoms[[i]][ atoms[[i]]$elety == "CB", c("x", "y", "z")]
     }
+    if(atoms[[j]]$resid[1] == "GLY") {
+      cbj <- atoms[[j]][ atoms[[j]]$elety == "CA", c("x", "y", "z")]
+    } else {
+      cbj <- atoms[[j]][ atoms[[j]]$elety == "CB", c("x", "y", "z")]
+    }
+
+    cai <- atoms[[i]][ atoms[[i]]$elety == "CA", c("x", "y", "z")]
+    caj <- atoms[[j]][ atoms[[j]]$elety == "CA", c("x", "y", "z")]
+
+    row <- data.frame(pdb.resno.i = atoms[[i]]$resno[1], pdb.resno.j = atoms[[j]]$resno[1],
+                      aai = aaa2a[atoms[[i]]$resid[1], ], aaj = aaa2a[atoms[[j]]$resid[1], ],
+                      dist.anyAtom = anyAtom,
+                      dist.ca = min(as.matrix(pdist::pdist(cai, caj))),
+                      dist.cb = min(as.matrix(pdist::pdist(cbi, cbj))),
+                      stringsAsFactors=F)
+    return(row)
   }
+  pdm <- do.call(rbind, apply(nns, MARGIN = 2, get_my_dists))
   return(pdm)
 }
 

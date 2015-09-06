@@ -74,10 +74,12 @@ get_UNIPROT2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(uniprotseq,
   pdbres <- pattern
   pdbidx <- data.frame(alnidx = which(pdbres != '-'), pdbidx = resnoidx, pdbres = pdbres[pdbres != '-'])
   seqres <- subject
-  seqidx <- data.frame(alnidx = which(seqres != '-'), seqidx = 1:length(which(seqres != '-')),
-                       alignmentidx = alignmentidx[-gapsidxs], seqres = seqres[seqres != '-'])
+  seqidx <- data.frame(alnidx = which(seqres != '-'), uniprotidx = 1:length(which(seqres != '-')),
+                       alignmentidx = alignmentidx[-gapsidxs], uniprotres = seqres[seqres != '-'])
 
   uniprotpdbidx <- merge(seqidx, pdbidx)
+
+  #return(list(aln=aln, uniprotpdbidx = uniprotpdbidx))
   #return(list(gapsidxs=gapsidxs, sthdomainidx=sthdomainidx, sthidx=sthidx, pdbidx=pdbidx, sthpdbidx=sthpdbidx, domainidx=domainidx, resnoidx=resnoidx,
   #            aln=aln, pfmmpdb=pfmmpdb, s.pfam=s.pfam, s.sth=s.sth, s.pdb = s.pdb, atoms=atoms, pattern = pattern, subject = subject))
   cat("Doing pairwise minimal atom distance calculations.\n")
@@ -89,12 +91,12 @@ get_UNIPROT2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(uniprotseq,
   pdm$uniprot.idx.j <- uniprotpdbidx[ as.character(pdm$pdb.resno.j), "seqidx"]
 
   return(list(pdm = pdm, uniprotpdbidx = uniprotpdbidx, aln = aln,
-              annot = list(pdb = pdbEntry$annot, uniprot = pfmmpdb)))
+              annot = list(pdb = pdbEntry$annot, uniprot = uniprotseq)))
 
 }
 
 
-get_pdbs_for_uniprotID <- function(uniprotID = "FIBB_CHICK",
+get_pdbs_for_uniprotID <- function(uniprotID = "FIBA_CHICK",
                                    pdbLocalPath = "data-raw/PDB/",
                                    resolution.th = 3.0, experimentalTech = "X-RAY DIFFRACTION") {
   mypdbs <- pdbUniprot[(pdbUniprot$Entry.name == uniprotID),]
