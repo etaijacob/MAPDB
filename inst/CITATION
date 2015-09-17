@@ -1,0 +1,19 @@
+citHeader("To cite MAPDB in publications use:")
+
+citEntry(entry = "Article",
+  title        = "Codon-level information improves predictions of inter-residue contacts
+                  in proteins by correlated mutation analysis",
+  author       = personList(as.person("Etai Jacob"),
+                            as.person("Ron Unger"),
+                            as.person("Amnon Horovitz")),
+  journal      = "eLIFE",
+  year         = "2015",
+  url          = "http://dx.doi.org/10.7554/eLife.08932",
+
+  textVersion  =
+  paste("Etai Jacob, Ron Unger and Amnon Horovitz (2015).",
+        "Codon-level information improves predictions of inter-residue contacts
+                  in proteins by correlated mutation analysis.",
+        "eLife 2015;10.7554/eLife.08932",
+        "URL  http://dx.doi.org/10.7554/eLife.08932.")
+)

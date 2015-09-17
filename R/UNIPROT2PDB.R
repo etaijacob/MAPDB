@@ -1,4 +1,49 @@
 #UNIPROT2PDB.R
+# MAPDB - An R package
+# Copyright (C) 2015  Etai Jacob
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+#This module was not tested yet!
+#Works only for plain uniprotID in an MSA fasta file
+map_all_PDB_structures_to_uniprot_fasta_file_using_anyAtom_Ca_Cb <- function(uniprotID,
+                                                                             pdbLocalPath = "data-raw/PDB/",
+                                                                             ...) {
+  #require(bio3d) ### TEMPORARY
+  unimpdb <- get_pdbs_for_uniprotID(uniprotID = uniprotID, pdbLocalPath = pdbLocalPath)
+  if(class(unimpdb) == "data.frame") {
+    if(dim(unimpdb)[1] == 0) {
+      return(NA)
+    }
+  }
+
+  if(length(unimpdb) == 0) {
+    return(NA)
+  } else if(is.na(unimpdb)) {
+    return(NA)
+  }
+  sthpdbmaps <- lapply(1:dim(unimpdb)[1],
+                       function(x) {
+                         cat(sprintf("Mapping pdb number: %d...\n", x))
+                         get_UNIPROT2PDB_pairwise_distances_between_anyAtom_Ca_Cb(uniprotseq = , mypdb = unimpdb[x,])
+                       }
+  )
+  return(list(sthpdbmaps = sthpdbmaps, pfmmpdb = pfmmpdb))
+
+}
 
 get_UNIPROT2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(uniprotseq,
                                                                      mypdb,

@@ -1,4 +1,20 @@
 #MAPDButils.R
+# MAPDB - An R package
+# Copyright (C) 2015  Etai Jacob
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 # Calculates lower triangle of i,j matrix:
 get_minimal_pairwise_dist_between_atoms_Ca_Cb <- function(atoms) {
@@ -7,7 +23,7 @@ get_minimal_pairwise_dist_between_atoms_Ca_Cb <- function(atoms) {
   nns <- combn(x = length(atoms), 2)
   cat(sprintf("Calculating %d distances.\n", length(nns)))
   get_my_dists <- function(mi) {
-    print(mi)
+    #print(mi)
     i <- names(atoms)[mi[1]]
     j <- names(atoms)[mi[2]]
 
@@ -37,6 +53,24 @@ get_minimal_pairwise_dist_between_atoms_Ca_Cb <- function(atoms) {
   }
   pdm <- do.call(rbind, apply(nns, MARGIN = 2, get_my_dists))
   return(pdm)
+}
+
+read.fasta.alignment <- function(inputMSAfile, inputMSAfileCommentSep = "|") {
+
+  msa <- seqinr::read.alignment(inputMSAfile, format = "fasta", forceToLower = F)
+  if(!is.na(inputMSAfileCommentSep)) {
+    mynames <- as.vector(sapply(msa$nam,
+                                function(s) gsub(sprintf("^\\s+%s\\s+$", inputMSAfileCommentSep), "",
+                                                 strsplit(x = s, sprintf("\\%s", inputMSAfileCommentSep))[[1]][1])))
+    msa$nam <- mynames
+  }
+  return(msa)
+}
+read.stockholm.alignment <- function(file) {
+  mm <- readLines(file)
+  mm <- do.call(rbind, strsplit(mm[-grep("^#", mm)], "\\s+", perl = T))
+  mm <- data.frame(name=mm[,1], seq=mm[,2], row.names = mm[,1], stringsAsFactors = F)
+  return(mm)
 }
 
 get_pdb_atom_coordinates <- function(pdbcode, chain, pdbLocalPath = "data-raw/PDB/") {

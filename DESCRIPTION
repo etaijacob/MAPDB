@@ -6,7 +6,7 @@ Date: 2015-09-04
 Author: Etai Jacob
 Maintainer: Who to complain to <etai.jacob@gmail.com>
 Description: Mapping between a solved structure residues in a PDB file and a Pfam domain family or Uniprot protein
-License: What license is it under?
+License: GPL-2
 LazyData: TRUE
 Authors@R: person("Etai", "Jacob", email = "etai.jacob@gmail.com",
   role = c("aut", "cre"))
