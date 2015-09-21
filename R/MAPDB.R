@@ -56,6 +56,7 @@ NULL
 #' @return A map of all known PDB residues to the msa file by PDB chain.
 #' @examples
 #' myPfamMap <- PDBs2Pfam("PF00075")
+#' #' @export
 PDBs2Pfam <- function(pfamid,
                       pfamSthFile = NA,
                       sth.local.db = "data-raw/STH/", pfamseqResource = "rp75", ...) {
