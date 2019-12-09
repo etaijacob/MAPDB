@@ -9,7 +9,7 @@ you should consider downloading first PDB and STH databases.
 
 This package can be used, for example, to calculate the accuracy of contact predictions based on MSA data (co-evolution).
 
-Please see an example of an application see the paper "Codon-level information improves predictions of inter-residue contacts in proteins by correlated mutation analysis"": http://dx.doi.org/10.7554/eLife.08932 
+Please see an example of an application in the paper "Codon-level information improves predictions of inter-residue contacts in proteins by correlated mutation analysis"": http://dx.doi.org/10.7554/eLife.08932 
 
 
 If you use this package please cite:
