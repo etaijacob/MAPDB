@@ -5,15 +5,20 @@ Version: 0.1
 Date: 2015-09-04
 Author: Etai Jacob
 Maintainer: Who to complain to <etai.jacob@gmail.com>
-Description: Mapping between a solved structure residues in a PDB file and a Pfam domain family or Uniprot protein
-License: GPL-2
+Description: Mapping between a solved structure residues in a PDB file and a Pfam domain family or Uniprot protein sequence alignments.
+License: MIT + file LICENSE
+Encoding: UTF-8
 LazyData: TRUE
 Authors@R: person("Etai", "Jacob", email = "etai.jacob@gmail.com",
   role = c("aut", "cre"))
 URL: https://github.com/etaijacob/MAPDB
 BugReports: https://github.com/etaijacob/MAPDB/issues
 Imports:
+  data.table,
+  Biostrings,
   bio3d,
   utils,
   pdist,
-  Biostrings
+  seqinr
+Depends: R (>= 3.5.0)
+RoxygenNote: 7.0.2

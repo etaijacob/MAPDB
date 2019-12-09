@@ -1,3 +1,8 @@
 .Rproj.user
 .Rhistory
 .RData
+*.pdb
+data-raw/*.lst
+data-raw/*.txt
+data-raw/*.td
+data-raw/*.RData

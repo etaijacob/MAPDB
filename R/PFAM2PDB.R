@@ -1,23 +1,15 @@
 #PFAM2PDB.R
-# MAPDB - An R package
-# Copyright (C) 2015  Etai Jacob
-#
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
 
-
+# tmp2 <- map_all_PDB_structures_to_pfam_sth_file_using_anyAtom_Ca_Cb(pfamid = "PF00075", max2take = 3,
+#                                                                     pfamSthFile = "/tmp/PF00075_rp75.sth",
+#                                                                     sth.local.db = "/tmp/", pdb.local.db = "/tmp/")
 map_all_PDB_structures_to_pfam_sth_file_using_anyAtom_Ca_Cb <- function(pfamid,
                                                                         pfamSthFile = NA,
-                                                                        sth.local.db = "data-raw/STH/", pfamseqResource = "rp75",
-                                                                        max2take=1000) {
+                                                                        sth.local.db, pdb.local.db,
+                                                                        pfamseqResource = "rp75",
+                                                                        resolution.th = 3.0,
+                                                                        max2take=12) {
+  pfmmpdb <- NULL
   if(is.na(pfamSthFile)) {
     pfamSthFile = sprintf("%s/%s_%s.sth", sth.local.db, pfamid, pfamseqResource)
     cat(sprintf("STH file was not given. Downloading to %s.\n", pfamSthFile))
@@ -25,7 +17,11 @@ map_all_PDB_structures_to_pfam_sth_file_using_anyAtom_Ca_Cb <- function(pfamid,
                   destfile = pfamSthFile)
   }
 
-  pfmmpdb <- choose_PDBs_for_a_pfamid(pfamid = pfamid, pfamSthFile = pfamSthFile)
+
+  try(
+    pfmmpdb <- choose_PDBs_for_a_pfamid(pfamid = pfamid, pfamSthFile = pfamSthFile, max2take = max2take,
+                                        resolution.th = resolution.th,
+                                        sth.local.db = sth.local.db, pdb.local.db = pdb.local.db))
   if(class(pfmmpdb) == "data.frame") {
     if(dim(pfmmpdb)[1] == 0) {
       return(NA)
@@ -37,10 +33,11 @@ map_all_PDB_structures_to_pfam_sth_file_using_anyAtom_Ca_Cb <- function(pfamid,
   } else if(is.na(pfmmpdb)) {
     return(NA)
   }
-  sthpdbmaps <- lapply(1:min(dim(pfmmpdb)[1], max2take),
+  sthpdbmaps <- lapply(1:min(nrow(pfmmpdb), max2take),
                        function(x) {
                          cat(sprintf("Mapping pdb number: %d...\n", x))
                          get_PFAM2PDB_pairwise_distances_between_anyAtom_Ca_Cb(pfamid = pfamid, pfamSthFile = pfamSthFile,
+                                                                               pdbLocalPath = pdb.local.db,
                                                                                pfmmpdb = pfmmpdb[x,])
                        }
   )
@@ -50,7 +47,7 @@ map_all_PDB_structures_to_pfam_sth_file_using_anyAtom_Ca_Cb <- function(pfamid,
 
 get_PFAM2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(pfamid,
                                                                   pfamSthFile = NA,
-                                                                  pfmmpdb,
+                                                                  pfmmpdb, pdbLocalPath,
                                                                   sth.local.db = "data-raw/STH/", pfamseqResource = "rp75",
                                                                   minimalOverlap=0.80) {
 
@@ -63,7 +60,7 @@ get_PFAM2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(pfamid,
 
 
   sth <- read.stockholm.alignment(pfamSthFile)
-  pdbEntry <- get_pdb_atom_coordinates(pfmmpdb$PDB_ID[1], pfmmpdb$CHAIN_ID[1])
+  pdbEntry <- get_pdb_atom_coordinates(pfmmpdb$PDB_ID[1], pfmmpdb$CHAIN_ID[1], pdbLocalPath =  pdbLocalPath)
   if(length(pdbEntry) == 0) {
     cat("ERROR - pdb entry is NA.\n")
     return(NA)
@@ -167,11 +164,32 @@ get_PFAM2PDB_pairwise_distances_between_anyAtom_Ca_Cb <- function(pfamid,
   #   return(list(map = map, annot = list(pdb = pdbEntry$annot, uniprot = pfmmpdb)))
 }
 
-
-choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
+#' Download and annotate the PDB files associated with the PFAM domain sequences in the sth file
+#'
+#' @param pfamid A Pfam id string.
+#' @param pfamSthFile A pfam sth file for pfamid.
+#' @param max2take The maximal number of PDB files to download with the given resolution (default = 3.0).
+#' @param resolution.th Minimal resoultion required for a solved structure to be considered.
+#' @param experimentalTech Experimental method required for the structre (default is X-RAY).
+#' @param pfamseqResource A sequence redundancy level as inidcated in Pfam - relevant when downloading the sth file.
+#' @param pdb.local.db A directory path to a local pdb database or temporary directory to save downloaded sth files.
+#' Can be used to accomulate files and avoid repeated downloads.
+#' @param sth.local.db A directory path to a local pfam database or temporary directory to save downloaded sth files.
+#' Can be used to accomulate files and avoid repeated downloads.
+#' @return A map of all known PDB residues to the msa file by PDB chain. TODO: add description
+#' @examples
+#' #In this example we download all relevant relevant PDB files pfam domain PF00075.
+#' #We limit the download to a total of 12 pdb instances with a resolution below 3.0 Ang.
+#' #If any of the pdb files was already downloaded and located in the pdb.local.db,
+#' #then it will be used to avoid
+#' #unnecessary download.
+#' tmp <- choose_PDBs_for_a_pfamid(pfamid = "PF00075", pfamSthFile = "/tmp/PF00075_rp75.sth",
+#'                                 pdb.local.db = "/tmp/", sth.local.db = "/tmp/", max2take = 3)
+#' @export
+choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA, max2take = 12,
                                      resolution.th = 3.0, experimentalTech = "X-RAY DIFFRACTION",
                                      pfamseqResource = "rp75",
-                                     pdb.local.db = "data-raw/PDB/", sth.local.db = "data-raw/STH/") {
+                                     pdb.local.db, sth.local.db) {
 
   #Get PDB assigned to Pfam:
   myPFmap <- hmmer_pdb_all[grep(pfamid, hmmer_pdb_all$PFAM_ACC), ]
@@ -180,7 +198,7 @@ choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
     return(NA)
   }
   myPFmap$PDB_ID <- tolower(myPFmap$PDB_ID)
-  mm <- merge(myPFmap, pdb_chain_uniprot, by.x=c("PDB_ID", "CHAIN_ID"), by.y = c("PDB", "CHAIN"))
+  mm <- merge(myPFmap, pdbUniprot, by.x=c("PDB_ID", "CHAIN_ID"), by.y = c("PDB", "CHAIN"))
 
   if(is.na(pfamSthFile)) {
     pfamSthFile = sprintf("%s/%s_%s.sth", sth.local.db, pfamid, pfamseqResource)
@@ -190,8 +208,10 @@ choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
                   destfile = pfamSthFile)
 
   }
-  pf <- get_uniprot_accs_and_ids_from_pfam_sth_file(pfamSthFile = pfamSthFile)
-  pfmm <- merge(pf, mm, by.x="acc", by.y="SP_PRIMARY")
+  pf <- get_uniprot_entry_names_and_ids_from_pfam_sth_file(pfamSthFile = pfamSthFile)
+  #return(list(pf = pf, mm = mm))
+  #pfmm <- merge(pf, mm, by.x="acc", by.y="SP_PRIMARY")
+  pfmm <- merge(pf, mm, by.x="prot_name", by.y="SP_PRIMARY")
   if(dim(pfmm)[1] == 0) {
     cat(sprintf("%s has 0 PDBs with uniprot mapping. Quiting.\n", pfamid))
     return(NA)
@@ -199,6 +219,7 @@ choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
 
   pdbAnnots <- NULL
   cntr <- 0
+  pdbCounter <- 0
   #This is done in a for loop since the main delay is the download process
   for(pdbcode in unique(pfmm$PDB_ID)) {
     cntr <- cntr + 1
@@ -213,9 +234,22 @@ choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
       next
     }
     cat(sprintf("Processing PDB file: %s (%d/%d).\n", fname, cntr, length(unique(pfmm$PDB_ID))))
-    pdb <- bio3d::read.pdb(fname)
-    pdb.annot <- bio3d::pdb.annotate(pdbcode)
-    pdbAnnots <- rbind(pdbAnnots, pdb.annot)
+    try_ret1 <- try(pdb <- bio3d::read.pdb(fname))
+    try_ret2 <- try(pdb.annot <- bio3d::pdb.annotate(pdbcode))
+    if(try_ret1[1] != "try-error" & try_ret2[1] != "try-error") {
+      pdbAnnots <- rbind(pdbAnnots, pdb.annot)
+      message("Resolution: ", min(pdb.annot$resolution))
+      if(sum(pdb.annot$resolution < resolution.th) > 0)
+        pdbCounter <- pdbCounter + 1
+
+    } else {
+      message("Error in retrieving ", pdbcode, ".")
+    }
+    if(pdbCounter >= max2take) {
+      message("Reached the max number of pdb entries to download (", max2take, ").")
+      break
+    }
+
   }
   if(length(pdbAnnots) == 0 | is.null(pdbAnnots)) {
     cat(sprintf("%s has 0 PDB annotations. Quiting.\n", pfamid))
@@ -228,14 +262,19 @@ choose_PDBs_for_a_pfamid <- function(pfamid = "PF00075", pfamSthFile = NA,
   return(pfmmpdb)
 }
 
-get_uniprot_accs_and_ids_from_pfam_sth_file <- function(pfamSthFile) {
+get_uniprot_entry_names_and_ids_from_pfam_sth_file <- function(pfamSthFile) {
   fname <- pfamSthFile
   text <- readLines(fname)
-  accs <- unlist(lapply(text[grep("#=GS.+AC", x=text, perl=T)],
-                        function(x) gsub("\\.\\d+", "", tail(strsplit(x, " ")[[1]], n=1))))
-  ids <- unlist(lapply(text[grep("#=GS.+AC", x=text, perl=T)],
-                       function(x) strsplit(x, " ")[[1]][2]))
-  return(data.frame(acc=accs, id=ids, stringsAsFactors = F))
+
+
+  ids <- unname(sapply(text[-grep("^#=|^#", x = text)], function(x) strsplit(x = x, " +")[[1]][1]))
+  prot_names <- unname(sapply(ids, function(x) strsplit(x, "/")[[1]][1]))
+  prot_names <- unname(sapply(prot_names, function(x) strsplit(x, split = "\\.")[[1]][1]))
+  # accs <- unlist(lapply(text[grep("#=GS.+AC", x=text, perl=T)],
+  #                       function(x) gsub("\\.\\d+", "", tail(strsplit(x, " ")[[1]], n=1))))
+  # ids <- unlist(lapply(text[grep("#=GS.+AC", x=text, perl=T)],
+  #                      function(x) strsplit(x, " ")[[1]][2]))
+  return(data.frame(prot_name = prot_names, id = ids, stringsAsFactors = F))
 }
 
 
