@@ -16,7 +16,7 @@
 #' It has two main functions:
 #'
 #' \itemize{
-#' \item Map all known PDB residues' coordinates to an Pfam seed STH file
+#' \item Map all known PDB residues' coordinates to a Pfam STH file
 #' \item Map all known PDB residues' coordinates to a fasta file (partially supported at this version)
 #' }
 #'
@@ -45,21 +45,21 @@ NULL
 #' @param pfamseqResource A sequence redundancy level as inidcated in Pfam - relevant when downloading the sth file.
 #' @return A map of all known PDB residues to the msa file by PDB chain. TODO: add description
 #' @examples
-# #In this example we download all relevant files for PF00075,
-# #including PDB files and sth alignment for the pfam domain.
-# #We limit the download to a total of 12 pdb instances with a resolution below 3.0 Ang.
-# #If any of the pdb files was already downloaded and located in the pdb.local.db,
-# #then it will be used to avoid
-# #unnecessary download.
-# myPfamMap <- PDBs2Pfam(pfamid = "PF00075", sth.local.db = "/tmp/",
-#                        max2take = 2, resolution.th = 3.0)
-#
-# #In this example we have already downloaded the sth file
-# #therefore including it in the call for the function in order
-# #to avoid unnecessary download
-#
-# myPfamMap <- PDBs2Pfam(pfamid = "PF00075", pfamSthFile = "/tmp/PF00075_rp75.sth",
-#                        sth.local.db = "/tmp/", max2take = 2, resolution.th = 3.0)
+#' #In this example we download all relevant files for PF00075,
+#' #including PDB files and sth alignment for the pfam domain.
+#' #We limit the download to a total of 12 pdb instances with a resolution below 3.0 Ang.
+#' #If any of the pdb files was already downloaded and located in the pdb.local.db,
+#' #then it will be used to avoid
+#' #unnecessary download.
+#' myPfamMap <- PDBs2Pfam(pfamid = "PF00075", sth.local.db = "/tmp/",
+#'                        max2take = 2, resolution.th = 3.0)
+#'
+#' #In this example we have already downloaded the sth file
+#' #therefore including it in the call for the function in order
+#' #to avoid unnecessary download
+#'
+#' myPfamMap <- PDBs2Pfam(pfamid = "PF00075", pfamSthFile = "/tmp/PF00075_rp75.sth",
+#'                        sth.local.db = "/tmp/", max2take = 2, resolution.th = 3.0)
 #' @export
 PDBs2Pfam <- function(pfamid,
                       pfamSthFile = NA, max2take = 12, resolution.th = 3.0,
@@ -115,4 +115,4 @@ PDBs2Pfam <- function(pfamid,
 #' @source \url{http://www.uniprot.org/uniprot}
 "pdbUniprot"
 
-if(getRversion() >= "2.15.1")  utils::globalVariables(c("pdbUniprot", "hmmer_pdb_all", "pfmmpdb"))
+if(getRversion() >= "2.15.1")  utils::globalVariables(c("pdbUniprot", "hmmer_pdb_all", "pfmmpdb", "aaa2a", "a2aaa"))

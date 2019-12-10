@@ -17,9 +17,9 @@ If you use this package please cite:
 Etai Jacob, Ron Unger and Amnon Horovitz (2015). Codon-level information improves predictions of inter-residue contacts in proteins by correlated mutation analysis. eLife 2015;10.7554/eLife.08932 http://dx.doi.org/10.7554/eLife.08932.
 
 # To install:
-
+```
 devtools::install_github("etaijacob/MAPDB")
-
+```
 # Example:
 
 In this example we download all relevant files for PF00075,
@@ -40,4 +40,5 @@ myPfamMap <- PDBs2Pfam(pfamid = "PF00075", pfamSthFile = "/tmp/PF00075_rp75.sth"
                        sth.local.db = "/tmp/", max2take = 2, resolution.th = 3.0)
 ```
 
-
+# Notes
+This pacakge code was checked on Mac OS 

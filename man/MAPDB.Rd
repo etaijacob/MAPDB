@@ -21,7 +21,7 @@ eLife 2015;10.7554/eLife.08932 URL http://dx.doi.org/10.7554/eLife.08932.
 It has two main functions:
 
 \itemize{
-\item Map all known PDB residues' coordinates to an Pfam seed STH file
+\item Map all known PDB residues' coordinates to a Pfam STH file
 \item Map all known PDB residues' coordinates to a fasta file (partially supported at this version)
 }
 
